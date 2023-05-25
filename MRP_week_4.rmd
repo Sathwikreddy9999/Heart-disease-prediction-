@@ -1,0 +1,373 @@
+Introduction: The data I am going to examine is collected from the Heath data trackers that are connected via cloud .The data is collected from the 272 respondents who are facing heart related complications,there are 14 different parameters the data is collected some of them are age,gender,cholesterol level,blood pressure etc.The main objective of my project is to find the association between two different predictor variables.The problem statement that I am going to solve is”Can the chest pain type be predicted with the help of different predictor variables which are closely associated”.
+
+I sourced the data set from kaggle which is an open source platform to procure the data sets,this data set has 272 observations in spread across 14 different parameters.
+
+The problem statement that I am going to mainly address is ’How the data collected by IoMT devices specifically heart rate can be used to predict the diseases in the human body before they mature, and cause severe illnesses,
+
+The questions associated with this problem statement are :
+
+How accurate is the prediction of illness in the human body by measuring the fluctuations in the human heart rate?
+
+What is the greatest number of disparities in the human body that can be predicted by analyzing the human heart rate?
+
+The prior probability density functions for all the four models are the range the of the heart rate .The range of the Max.H.R can be determined by using summary function on the dataset I selected .
+
+Beta (Max.HR , all_predictor variables ) ∼ N(m0,s.d^2)
+
+Beta (Max.HR,Age+BP+FBS.over.120+Cholesterol+Sex) ∼ N(m1, s.d^2)
+
+Beta(Max.HR,Chest.pain.type+FBS.over.120+Slope.of.ST+Number.of.vessels.fluro) ∼ N(m3, s.d^2)
+
+```{r}
+library(bayesrules)
+library(tidyverse)
+library(bayesplot)
+library(rstanarm)
+library(broom.mixed)
+library(tidybayes)
+library(GGally)
+
+```
+
+Loaded the required data set by specifying the exact path required and the header is set as true.
+
+```{r}
+dataset <- read.csv("C:/Users/sathw/Desktop/Heart_Disease_Prediction.csv", header=TRUE)
+view(dataset)
+summary(dataset)
+str(dataset)
+```
+
+
+```{r}
+dataset1=dataset%>%select(Age,BP,FBS.over.120,Cholesterol,Chest.pain.type,ST.depression,Number.of.vessels.fluro,Thallium,Sex,Max.HR)
+```
+
+1)The view function is used to view the contents in the file dataset
+
+2)The summary function is used to summarize the contents in the dataset file.
+
+3)Str function specifies the string name from each and every variables
+
+```{r}
+ggpairs(dataset1)
+
+```
+
+```{r}
+summary(dataset1)
+dataset1 %>% na.omit(dataset1)
+
+```
+
+
+As The outcome is binary i.e the disease -Present in the body (or) absent in the body .I would be using the logistic regression approach .Since it gives the probability of the occurrence of the event based on the independent variables .The most of the variables i filtered are independent variables.
+
+The data model I would be going to examine is: The first model contains all the parameters present in the table: The prior intercept That I am considering is the range of the heartbeat. The data on the range of the heartbeat is gathered by analyzing the summary function. Hence the prior intercept I selected is (71,1,Autoscale=True) because the heartbeat is ranging from 71 to 202.Based on the summary values of the MAX.HR the prior intercept shoud be plugged in as (71,65.5),mean=71,SD=65.5,based on the standard deviation the heart rate cannot be negitive i.e -65.5 to + 65.5 because of the above reason I plugged in the SD=value as 1 and set it to autoscale=TRUE .
+```{r}
+model_1 <- stan_glm(
+  Max.HR~., 
+  data = dataset1, family = gaussian,
+  prior_intercept = normal(71,1,autoscale = TRUE),
+  prior = normal(0, 1, autoscale = TRUE), 
+  prior_aux = exponential(1, autoscale = TRUE),
+  chains = 4, iter = 5000*2, seed = 84735,prior_PD = TRUE)
+```
+
+```{r}
+summary(model_1)
+
+```
+
+
+summary of the function determines that the prior intercept is with the mean of 69.8 and the standard deviation 267.8.
+
+The mcmc_trance function is used to denote the chains .The chains produced for the above model appears to be mixed well together .Hence they are considered as the stable.
+
+The MCMC trance gives the assessment of the convergence and mixing of the MCMC chains with the MAX.HR parameter. The above shows that MAX.HR is positive with the rest of the parameters.
+
+The mcmc_overlay function represents the probability density function of each parameter overlap with each other well .In the above graph papers that like sufficiently overlapped with each other.
+
+The MCMC_dens_overlay function is used to create overlaid density plots of both prior and posterior distribution with respect to the MCMC Simulation. In the above scenario the MCMC density is estimated across all the parameters.
+```{r}
+mcmc_trace(model_1, size = 0.1)
+mcmc_dens_overlay(model_1)
+mcmc_acf(model_1)
+
+```
+
+```{r}
+neff_ratio(model_1)
+rhat(model_1)
+prior_summary(model_1)
+
+```
+
+The prior_summary function gives the summary of the prior of the specified model .As the summary function suggests that most of the functions I considered is mostly true.The hypothesis I considered for the prior summary is mostly turned out to be true since the values of the prior normal did not vary drastically.
+
+```{r}
+set.seed(84735)
+posteriorpredict=posterior_predict(model_1)
+posterior_interval(posteriorpredict,prob=0.95)
+summary(posteriorpredict)
+
+```
+
+```{r}
+pp_check(model_1)
+
+```
+
+The pp check function gives the predicted values plots by comparing the observed outcome variable y to the simulated values y rep .In the above graph the simulated values are spread across the graph while the observed value is mostly skewed in the value of 180.
+
+```{r}
+tidy(model_1,conf.int = TRUE,conf.level=0.9999)
+
+```
+
+
+I used tidy function to identify the subset of predictors that can help to produce the most accurate predictors that are statistically significant with the MAX.HR. As the table suggests that most of the predictors are near to the value zero the null hypothesis can be rejected but there are couple of them that need be considered those are the FBS.over.120,sex ,chest pain type ,ST depression and number of vessels fluro are significant predictor variables.
+
+
+-------------------------------------------------------
+Model-2(Reduced model-1) I am using ,FBS.over.120,cholesterol and gender as predictors and all the predictor variables are not statistically significant with each other .I am going to set up the heart beat range as the prior_intercept while the prior normal as the week prior normal .Hence it is set as auto scale.
+
+```{r}
+dataset%>%
+  select(FBS.over.120,Chest.pain.type,Sex,Max.HR)%>%
+  ggpairs()
+```
+
+```{r}
+model_2 <- stan_glm(
+  Max.HR~Age+BP+FBS.over.120+Chest.pain.type+Sex, 
+  data = dataset1, family = gaussian,
+  prior_intercept = normal(71,1,autoscale = TRUE),
+  prior = normal(0, 1, autoscale = TRUE), 
+  prior_aux = exponential(1, autoscale = TRUE),
+  chains = 4, iter = 5000*2, seed = 84735,prior_PD = TRUE)
+```
+
+```{r}
+summary(model_2)
+
+```
+
+The summary of the function determines that the prior intercept is with the mean of 73.0 and the standard deviation 237.7, with the value of 382.8 in 90% confidence interval.The rhat value is 1 for all the predictor variables.Additionally we can find that FBS.over.120 and sex is positively correlated with the heart rate.
+
+```{r}
+mcmc_trace(model_2, size = 0.1)
+mcmc_dens_overlay(model_2)
+mcmc_acf(model_2)
+neff_ratio(model_2)
+```
+
+The mcmc_trance function is used to denote the chains .The chains produced for the above model appers to be mixed well together .Hence they are considered as the stable.
+
+The MCMC_trance gives the assessment of the convergence and mixing of the MCMC chains with the MAX.HR parameter. The above shows that MAX.HR is positive with the rest of the parameters.
+
+The MCMC_dens_overlay function represents the probability density function of each parameter overlap with each other well .In the above graph papers that like sufficiently overlapped with each other.
+
+The MCMC_dens_overlay function is used to create overlaid density plots of both prior and posterior distribution with respect to the MCMC Simulation. In the above scenario the MCMC density is estimated across all the parameters.
+
+
+```{r}
+rhat(model_2)
+```
+
+```{r}
+prior_summary(model_2)
+```
+
+Prior_summary-The values we assumed are sufficiently identical to the values produced in the prior summary .Hence the values we considered are mostly correct.
+
+```{r}
+tidy(model_2,conf.int = TRUE,conf.level=0.9999)
+```
+
+TIDY FUNCTION-As the table suggests that most of the predictors are near to the value zero the null hypothesis can be rejected but there are couple of them that need be considered those are the FBS.over.120,sex and chest pain type are significant predictor variables and age,BP is mostly equal to zero.Since there is no strong relationship between the BP and Max.HR we can reject the null hypothesis.
+```{r}
+pp_check(model_2)
+```
+
+
+PP_check-The pp check function gives the predicted values plots by comparing the observed outcome variable y to the simulated values y rep .In the above graph the simulated values are spread across the graph while the observed value is mostly skewed in the value of 190.Additionally we can observe that the simulated values are more skewed than the outcome variables.
+
+
+
+
+
+-------------------------------------------------------
+
+Model-3 I am using Chest pain type,FBS over 120,slope of ST and number of vessels of fluro as predictors and considering all the predictor variables are not statistically significant with each other .I am going to set up the heart beat range as the prior_intercept while the prior normal as the week prior normal .Hence it is set as auto scale.
+```{r}
+dataset3=dataset%>%select(Chest.pain.type,FBS.over.120,Slope.of.ST,Number.of.vessels.fluro,Max.HR)
+model_3 <- stan_glm(
+  Max.HR~Chest.pain.type+FBS.over.120+Slope.of.ST+Number.of.vessels.fluro, 
+  data = dataset3, family = gaussian,
+  prior_intercept = normal(71,65.5),
+  prior = normal(0, 1, autoscale = TRUE), 
+  prior_aux = exponential(1, autoscale = TRUE),
+  chains = 4, iter = 5000*2, seed = 84735,prior_PD = TRUE)
+
+```
+
+```{r}
+summary(model_3)
+
+```
+
+```{r}
+mcmc_trace(model_3, size = 0.1)
+mcmc_dens_overlay(model_3)
+mcmc_acf(model_3)
+```
+
+```{r}
+neff_ratio(model_3)
+
+```
+
+The mcmc_trance function is used to denote the chains .The chains produced for the above model appears to be mixed well together .Hence they are considered as the stable.
+
+The MCMC_trance gives the assessment of the convergence and mixing of the MCMC chains with the MAX.HR parameter. The above shows that MAX.HR is positive with the rest of the parameters.
+
+The mcmc_overlay function represents the probability density function of each parameter overlap with each other well .In the above graph papers that like sufficiently overlapped with each other.
+
+The MCMC_dens_overlay function is used to create overlaid density plots of both prior and posterior distribution with respect to the MCMC Simulation. In the above scenario the MCMC density is estimated across all the parameters.
+
+```{r}
+rhat(model_3)
+
+```
+
+```{r}
+posterior_interval(model_3, prob = 0.90)
+
+```
+
+```{r}
+pp_check(model_3)
+
+```
+
+
+The pp check function gives the predicted values plots by comparing the observed outcome variable y to the simulated values y rep .In the above graph the simulated values are spread across the graph while the observed value is mostly skewed in the value around 190 .
+```{r}
+tidy(model_3,conf.int = TRUE,conf.level=0.9999)
+```
+
+
+-------------------------------------------------------
+
+```{r}
+pp_check(model_1)
+```
+
+```{r}
+pp_check(model_2)
+```
+
+```{r}
+pp_check(model_3)
+```
+
+pp_check Function is applied across all three models.
+
+```{r}
+set.seed(2022) 
+predictions <- posterior_predict(model_1, newdata = dataset)
+dim(predictions)
+```
+
+```{r}
+set.seed(2022) 
+predictions_r1 <- posterior_predict(model_2, newdata = dataset)
+dim(predictions)
+```
+
+```{r}
+set.seed(2022) 
+predictions_r3 <- posterior_predict(model_3, newdata = dataset)
+dim(predictions)
+```
+
+```{r}
+ppc_intervals(dataset$Max.HR,
+              yrep = predictions, 
+              prob = 0.5, 
+              prob_outer = 0.95)
+```
+
+```{r}
+ppc_intervals(dataset$Max.HR,
+              yrep = predictions_r1, 
+              prob = 0.5, 
+              prob_outer = 0.95)
+```
+
+```{r}
+ppc_intervals(dataset$Max.HR,
+              yrep = predictions_r3, 
+              prob = 0.5, 
+              prob_outer = 0.95)
+```
+
+```{r}
+set.seed(84735)
+cv_procedure <- prediction_summary_cv(
+  model = model_1, data = dataset, k = 10)
+cv_procedure$folds
+```
+
+```{r}
+cv_procedure$cv
+
+```
+
+```{r}
+set.seed(84735)
+cv_procedure <- prediction_summary_cv(
+  model = model_2, data = dataset, k = 10)
+cv_procedure$folds
+```
+
+```{r}
+cv_procedure$cv
+
+```
+
+```{r}
+set.seed(84735)
+cv_procedure <- prediction_summary_cv(
+  model = model_3, data = dataset, k = 10)
+cv_procedure$folds
+```
+
+```{r}
+cv_procedure$cv
+
+```
+
+```{r}
+set.seed(84735)
+prediction_summary(model = model_1, data = dataset)
+```
+
+```{r}
+set.seed(84735)
+prediction_summary(model = model_2, data = dataset)
+```
+
+```{r}
+set.seed(84735)
+prediction_summary(model = model_3, data = dataset)
+```
+
+Conclusion:
+
+Human heart rate solely cannot cannot be accountable for predicting the heart complications .But by analyzing the heart rate there will be some useful insight that can be obtained.According to my data set that I considered .There are only limited parameter values that can be analysed by real time human heart beat analysis .The predictor values that can be analysed and having the most statistical significance for the above solution are (Chest.pain.type+FBS.over.120+Slope.of.ST+Number.of.vessels.fluro)
+
+By this we can conclude that the parameter that possess most statistical significance with the human heart rate is chest pain type followed by the blood sugar level,slope of ST and Number.of.vessels.fluro.
+
+In the Follwing week I would analyse the type of chest pain by using regression tree models.

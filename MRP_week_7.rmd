@@ -1,0 +1,817 @@
+Introduction
+
+The data I am going to examine is collected from the Heath data trackers that are connected via cloud .The data is collected from the 272 respondents who are facing heart related complications,there are 14 different parameters the data is collected some of them are age,gender,cholesterol level,blood pressure etc.The main objective of my project is to find the association between two different predictor variables.The problem statement that I am going to solve is"Can the chest pain type be predicted with the help of different predictor variables which are closely associated".
+
+I sourced the data set from kaggle which is an open source platform to procure the data sets,this data set has 272 observations in spread across 14 different parameters.
+
+The questions that I am trying to address through this data analysis project are jotted down below:
+
+1)What are the predictor variables closely associated with the chest pain type predictor variable or Is there any way can the type of chest pain type be predicted The questions that I am trying to address through this data analysis project are jotted down below:
+
+1)What are the predictor variables closely associated with the chest pain type predictor variable or Is there any way can the type of chest pain type be predicted by the use other different predictor variables that are closely associated?
+
+2)Can the chest pain type be predicted with the help of different predictor variables which are closely associated?
+
+Along this project I am going to use different set analytical techniques applicable for regression to predict my categorical variable type of chest pain.The regression techniques I am going to use are regression tree models,SVM Regression, clustering techniques,lasso ridge analysis to access the chest pain type.
+
+2.Type of analysis
+
+I will be using the following analysis:
+
+1)Logistic Regression-To find the association of the remaining predictor variables with the chest pain type.
+
+2)LASSO Regression- I would be using lasso regression to find the most important predictors that are closely associated with the chest pain type.
+
+3)RIDGE REGRESSION- I would be using ridge regression to access the importance of the variables with the chest pain type,while taking into account of the multicollinearity.
+
+4)BOOSTED TREE- I will be using boosted tree model to access the non linear relationships between the other predictor variables with the chest pain type variable.In the process I would be using the it to access the feature importance scores of the other predictor variables.
+
+5)K-Means Clustering-I will be using K means clustering to gain insights about the patterns of the predictor variables that are associated with the different types of chest pain type.K Means clustering can be also used to identify the data about the group of patients with the similar predictor variables .
+
+6)SVM LINEAR REGRESSION-In context for finding the chest pain type I would be using the SVM regression for finding the non-Linear relationship with the chest pain score .
+
+For my categorical variable I would be using lasso and ridge following that I would bagged tree model,random forest model,boosted tree model using caret .In addition to that I will be using SVM classification and clustering techniques.
+
++--------+--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| SNO    | METHOD             | EXPLANATION                                                                                                                                                                                                                                                                                                                                                              | RATIONALE OF USING THE METHOD                                                                                                                                                                                                                                                               |
++========+====================+==========================================================================================================================================================================================================================================================================================================================================================================+=============================================================================================================================================================================================================================================================================================+
+| 1      | LASSO AND RIDGE    | LASSO REGRESSION-Lasso regression is used for future selection and regularization.Lasso regression is used to make the least important predictors to zero thus helps in reducing over fitting the model                                                                                                                                                                  | I would be using lasso regression to determine the most important predictor variables in predicting that are aligned to the chest pain type,parallelly shrinking the coefficients of least important variables towards zero this can prevent from over fitting the model.                   |
+|        |                    |                                                                                                                                                                                                                                                                                                                                                                          |                                                                                                                                                                                                                                                                                             |
+|        |                    | RIDGE REGRESSION-Ridge regression is form of linear regression but the difference is ridge regression sets all the predictor variables to zero and perform the operation.                                                                                                                                                                                                | I would be using ridge regression to access the importance of the variables with the chest pain type,while taking into account of the multicollinearity .                                                                                                                                   |
++--------+--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| 2      | BOOSTED TREE       | Boosted tree model is the regression model of the bagged tree model .It helps to improve accuracy of the of the prediction with the combination of the multiple decision tress.In addition of that it also helps to capture non linear relationships between the predictor variables which lacks in bagged tree model.                                                   | I will be using boosted tree model to access the non linear relationships between the other predictor variables with the chest pain type variable.In the process I would be using the it to access the feature importance scores of the other predictor variables..                         |
++--------+--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| 3      | SVM REGRESSION     | SVM regression is used to predict the continuous variables and categorical variables. It works by finding the distance between the predictor variables by using hyper plane and the support vectors.                                                                                                                                                                     | In context for finding the chest pain type I would be using the SVM regression for finding the non-Linear relationship with the chest pain score .                                                                                                                                          |
++--------+--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| 4      | K-means clustering | K-means clustering is partitions the data set into K-clusters based on the similarity of the data points.K means clustering identify the group of patients associated with the different types of chest pain type.It also helps in iteratively assigning data points to the nearest cluster and updating the cluster based on the average of the points of each cluster. | I will be using K means clustering to gain insights about the patterns of the predictor variables that are associated with the different types of chest pain type.K Means clustering can be also used to identify the data about the group of patients with the similar predictor variables |
++--------+--------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+
+```{r}
+library(MASS)
+
+
+ds.obj <- read.csv("C:/Users/sathw/Desktop/Heart_Disease_Prediction.csv", header=TRUE)
+ds.obj <- as.data.frame(ds.obj)
+
+# Convert Chest Pain Type to a factor
+ds.obj$Chest.pain.type <- as.factor(ds.obj$Chest.pain.type)
+
+sz <- floor(nrow(ds.obj)/2)
+set.seed(123)
+train.index <- sample(1:nrow(ds.obj), sz)
+train.data <- ds.obj[train.index, ]
+test.data <- ds.obj[-train.index, ]
+
+
+
+
+glmmodel.fit <- glm(Chest.pain.type ~ ., family = binomial, data = train.data)
+summary(glmmodel.fit)
+```
+
+```{r}
+library(MASS)
+
+
+ds.obj <- read.csv("C:/Users/sathw/Desktop/Heart_Disease_Prediction.csv", header=TRUE)
+ds.obj <- as.data.frame(ds.obj)
+
+# Convert Chest Pain Type to a factor
+ds.obj$Chest.pain.type <- as.factor(ds.obj$Chest.pain.type)
+
+sz <- floor(nrow(ds.obj)/2)
+set.seed(123)
+train.index <- sample(1:nrow(ds.obj), sz)
+train.data <- ds.obj[train.index, ]
+test.data <- ds.obj[-train.index, ]
+
+
+
+
+glmmodel.fit <- glm(Chest.pain.type ~ ., family = binomial, data = train.data)
+summary(glmmodel.fit)
+```
+
+```{r}
+# Make predictions on the test set using the trained model
+glmmodel.probs <- predict(glmmodel.fit, test.data, type="response")
+glmmodel.pred <- ifelse(glmmodel.probs > 0.5, "Low", "High")
+
+# Evaluate the predictions using a confusion matrix
+tbl.results <- table(test.data$Chest.pain.type, glmmodel.pred)
+print(tbl.results)
+```
+
+```{r}
+predvals <- predict(glmmodel.fit, test.data)
+
+```
+
+LASSO AND RIDGE
+
+```{r}
+#lasso and ridge 
+library(MASS)
+library(glmnet)
+
+
+```
+
+```{r}
+
+# Load the Heart Prediction dataset
+ds.obj <- na.omit(read.csv("C:/Users/sathw/Desktop/Heart_Disease_Prediction.csv", header = TRUE, sep = ",", 
+                             na.strings = "?"))
+ds.obj <- as.data.frame(ds.obj)
+
+
+# Check the data summary and convert the categorical variable to factor
+summary(ds.obj)
+```
+
+```{r}
+ds.obj$Chest.pain.type <- as.factor(ds.obj$Chest.pain.type)
+summary(ds.obj)
+```
+
+```{r}
+# Create the matrix of predictors and the vector of outputs
+X <- model.matrix(Chest.pain.type ~ ., ds.obj)
+Y <- as.numeric(as.character(ds.obj$Chest.pain.type))
+
+
+# Create a range of values for lambda
+grid <- 10 ^ seq(10, -2, length = 100)
+
+# Perform Lasso Regression
+set.seed(1)
+cv.output.lasso <- cv.glmnet(x = X, y = Y, alpha = 1, lambda = grid)
+
+# Plot log of lambda vs. cross-validation errors
+png(filename="lambda-mse-lasso.png")
+plot(cv.output.lasso)
+dev.off()
+```
+
+```{r}
+# Get the estimated coefficients that correspond to the minimum lambda value
+round(predict(cv.output.lasso, type="coefficients", s = cv.output.lasso$lambda.min), 6)
+```
+
+```{r}
+# Perform Ridge Regression
+set.seed(1)
+cv.output.ridge <- cv.glmnet(x = X, y = Y, alpha = 0, lambda = grid)
+
+# Plot log of lambda vs. cross-validation errors
+png(filename="lambda-mse-ridge.png")
+plot(cv.output.ridge)
+dev.off()
+```
+
+```{r}
+# Get the estimated coefficients that correspond to the minimum lambda value
+round(predict(cv.output.ridge, type="coefficients", s = cv.output.ridge$lambda.min), 6)
+```
+
+\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\--Tree models
+
+```{r}
+#tree models
+library(randomForest)
+library(gbm)
+library(caret)
+library(doParallel)
+library(GGally)
+
+
+
+
+
+```
+
+```{r}
+cl <- makePSOCKcluster(5)
+registerDoParallel(cl)
+
+dsobject <- na.omit(read.csv("C:/Users/sathw/Desktop/Heart_Disease_Prediction.csv", header = TRUE, sep = ",", 
+                             na.strings = "?"))
+summary(dsobject)
+```
+
+```{r}
+ggpairs(dsobject)
+```
+
+```{r}
+##view updated summary of data after factors are converted
+dsobject$Sex <- factor(dsobject$Sex, 
+                       levels = c(0, 1), 
+                       labels = c("F", "M"))
+
+dsobject$Chest.pain.type <- factor(dsobject$Chest.pain.type,
+                                   levels = c(1, 2, 3, 4),
+                                   labels = c("TA", "ATA",
+                                              "NAP", "ASY"))
+
+dsobject$FBS.over.120 <- factor(dsobject$FBS.over.120,
+                                levels = c(0, 1),
+                                labels = c("false", "true"))
+
+dsobject$EKG.results <- factor(dsobject$EKG.results,
+                               levels = c(0, 1, 2),
+                               labels = c("normal", "wave.abnormality",
+                                          "ventricular.hypertrophy"))
+
+dsobject$Exercise.angina <- factor(dsobject$Exercise.angina, levels = c(0, 1), 
+                                   labels = c("no", "yes"))
+
+dsobject$Slope.of.ST <- factor(dsobject$Slope.of.ST, 
+                               levels = c(1, 2, 3),
+                               labels = c("upsloping", "flat", "downsloping"))
+
+dsobject$Thallium <- factor(dsobject$Thallium,
+                            levels = c(3, 6, 7),
+                            labels = c("normal", "fixed.defect", "reversible.defect"))
+
+dsobject$Number.of.vessels.fluro <- as.factor(ifelse(dsobject$Number.of.vessels.fluro == 0, 0, 1))
+dsobject$Number.of.vessels.fluro <- factor(dsobject$Number.of.vessels.fluro,
+                                           levels = c(0, 1),
+                                           labels = c("less.than.50.pct", "more.than.50.pct"))
+
+
+dsobject <- dsobject[, -14] ## remove the previous version of num
+summary(dsobject)
+```
+
+```{r}
+## identify any predictors that have zero or near-zero variance
+nzv <- nearZeroVar(dsobject, saveMetrics= TRUE)
+nzv ## run and see if there are any non-varying variables
+```
+
+Bagged Tree Model
+
+```{r}
+
+set.seed(1984)
+trainIndices <- createDataPartition(dsobject$Chest.pain.type, ## indicate which var. is outcome
+                                    p = 0.8, # indicate proportion to use in training-testing
+                                    list = FALSE, 
+                                    times = 1)
+
+training <- dsobject[trainIndices,]
+holdout <- dsobject[-trainIndices,]
+
+## centering and scaling as part of the pre-processing step
+preProcValues <- preProcess(training, method = c("center", "scale"))
+
+## Next, create the scaled+centered of the training+testing subset of the dataset
+trainTransformed <- predict(preProcValues, training) 
+## apply the same scaling and centering on the holdout set, too
+holdoutTransformed <- predict(preProcValues, holdout)
+
+
+
+fitControl <- trainControl(
+  method = "repeatedcv", ## perform repeated k-fold CV
+  number = 5,
+  repeats = 1,
+  classProbs = TRUE)
+
+
+
+
+grid <- expand.grid(mtry = ncol(trainTransformed))
+
+
+# Train the bagged tree model
+bagfit <- train( Chest.pain.type~ .,
+                data = trainTransformed, 
+                method = "rf",
+                trControl = fitControl,
+                verbose = FALSE,
+                tuneGrid = grid)
+
+
+
+names(bagfit)
+
+```
+
+```{r}
+trellis.par.set(caretTheme())
+
+
+predvals <- predict(bagfit, holdoutTransformed)
+
+
+confusionMatrix(predvals, holdoutTransformed$Chest.pain.type)
+```
+
+```{r}
+varImp(bagfit)
+
+```
+
+Random Forest
+
+```{r}
+fitControl <- trainControl(
+  method = "repeatedcv", ## perform repeated k-fold CV
+  number = 5,
+  repeats = 1,
+  classProbs = TRUE)
+
+
+
+
+grid <- expand.grid(mtry = 1:(ncol(trainTransformed)-1))
+
+forestfit <- train(Chest.pain.type ~ .,
+                   data = trainTransformed, 
+                   method = "rf",
+                   trControl = fitControl,
+                   verbose = FALSE,
+                   tuneGrid = grid)
+
+## check what information is available for the model fit
+names(forestfit)
+```
+
+```{r}
+## some plots
+trellis.par.set(caretTheme())
+plot(forestfit)
+```
+
+```{r}
+## make predictions on the hold-out set
+predvals <- predict(forestfit, holdoutTransformed)
+
+## create the confusion matrix and view the results
+confusionMatrix(predvals, holdoutTransformed$Chest.pain.type)
+```
+
+```{r}
+## Rank the variables in terms of their importance
+varImp(forestfit)
+```
+
+Boosted Tree Model
+
+```{r}
+grid <- expand.grid(interaction.depth = seq(1:3),
+                    shrinkage = seq(from = 0.01, to = 0.2, by = 0.01),
+                    n.trees = seq(from = 100, to = 500, by = 100),
+                    n.minobsinnode = seq(from = 5, to = 15, by = 5)
+)
+
+
+boostedfit <- train(Chest.pain.type ~ .,
+                    data = trainTransformed, 
+                    method = "gbm",
+                    trControl = fitControl,
+                    verbose = FALSE,
+                    tuneGrid = grid)
+## check what information is available for the model fit
+names(boostedfit)
+```
+
+```{r}
+## some plots
+trellis.par.set(caretTheme())
+plot(boostedfit)
+```
+
+```{r}
+## make predictions on the hold-out set
+predvals <- predict(boostedfit, holdoutTransformed)
+
+## compute the performance metrics
+confusionMatrix(predvals, holdoutTransformed$Chest.pain.type)
+```
+
+```{r}
+varImp(boostedfit)
+```
+
+```{r}
+stopCluster(cl)
+```
+
+\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\--
+
+Clustering
+
+```{r}
+
+
+dsobject <- na.omit(read.csv("C:/Users/sathw/Desktop/Heart_Disease_Prediction.csv", header = TRUE, sep = ",", 
+                             na.strings = "?"))
+View(dsobject)
+
+# Select only the necessary columns for clustering
+clustering_data <- dsobject[,c(3,13,5,12)]
+
+# Scale the data
+scaled_data <- scale(clustering_data)
+
+wss <- (nrow(scaled_data)-1)*sum(apply(scaled_data,2,var))
+for (i in 2:10) wss[i] <- sum(kmeans(scaled_data, centers=i)$withinss)
+plot(1:10, wss, type="b", xlab="Number of Clusters", ylab="Within groups sum of squares")
+```
+
+```{r}
+# Based on the plot, choose k=2
+k <- 2
+
+# Cluster the data
+kmeans_result <- kmeans(scaled_data, centers=k)
+
+# Print the cluster centers and sizes
+cat("Cluster Centers:\n")
+```
+
+```{r}
+print(kmeans_result$centers)
+```
+
+```{r}
+cat("Cluster Sizes:\n")
+```
+
+```{r}
+print(kmeans_result$size)
+```
+
+```{r}
+# Add the cluster labels to the original data
+dsobject$cluster <- kmeans_result$cluster
+
+# View the resulting data
+head(dsobject)
+```
+
+```{r}
+summary(clustering_data)
+```
+
+SVM linear
+
+```{r}
+library(MASS)
+library(randomForest)
+library(gbm)
+library(caret)
+library(doParallel)
+library(ggplot2)
+library(plyr)
+```
+
+```{r}
+cores <- detectCores()
+cl <- makePSOCKcluster(cores) #or cores-1
+registerDoParallel(cl)
+
+dsobject <- na.omit(read.csv("C:/Users/sathw/Desktop/Heart_Disease_Prediction.csv", header = TRUE, sep = ",", 
+                             na.strings = "?"))
+summary(dsobject)
+```
+
+```{r}
+ggpairs(dsobject)
+
+```
+
+```{r}
+dsobject$Sex <- factor(dsobject$Sex, 
+                       levels = c(0, 1), 
+                       labels = c("F", "M"))
+
+dsobject$Chest.pain.type <- factor(dsobject$Chest.pain.type,
+                                   levels = c(1, 2, 3, 4),
+                                   labels = c("TA", "ATA",
+                                              "NAP", "ASY"))
+
+dsobject$FBS.over.120 <- factor(dsobject$FBS.over.120,
+                                levels = c(0, 1),
+                                labels = c("false", "true"))
+
+dsobject$EKG.results <- factor(dsobject$EKG.results,
+                               levels = c(0, 1, 2),
+                               labels = c("normal", "wave.abnormality",
+                                          "ventricular.hypertrophy"))
+
+dsobject$Exercise.angina <- factor(dsobject$Exercise.angina, levels = c(0, 1), 
+                                   labels = c("no", "yes"))
+
+dsobject$Slope.of.ST <- factor(dsobject$Slope.of.ST, 
+                               levels = c(1, 2, 3),
+                               labels = c("upsloping", "flat", "downsloping"))
+
+dsobject$Thallium <- factor(dsobject$Thallium,
+                            levels = c(3, 6, 7),
+                            labels = c("normal", "fixed.defect", "reversible.defect"))
+
+dsobject$Number.of.vessels.fluro <- as.factor(ifelse(dsobject$Number.of.vessels.fluro == 0, 0, 1))
+dsobject$Number.of.vessels.fluro <- factor(dsobject$Number.of.vessels.fluro,
+                                           levels = c(0, 1),
+                                           labels = c("less.than.50.pct", "more.than.50.pct"))
+
+
+dsobject <- dsobject[, -14] ## remove the previous version of num
+summary(dsobject)
+```
+
+```{r}
+nzv <- nearZeroVar(dsobject, saveMetrics= TRUE)
+nzv
+```
+
+```{r}
+set.seed(1984)
+trainIndices <- createDataPartition(dsobject$Chest.pain.type, ## indicate which var. is outcome
+                                    p = 0.8, # indicate proportion to use in training-testing
+                                    list = FALSE, 
+                                    times = 1)
+
+training <- dsobject[trainIndices,]
+holdout <- dsobject[-trainIndices,]
+
+## centering and scaling as part of the pre-processing step
+preProcValues <- preProcess(training, method = c("center", "scale"))
+
+## Next, create the scaled+centered of the training+testing subset of the dataset
+trainTransformed <- predict(preProcValues, training) 
+## apply the same scaling and centering on the holdout set, too
+holdoutTransformed <- predict(preProcValues, holdout)
+
+fitControl <- trainControl(
+  method = "repeatedcv", ## perform repeated k-fold CV
+  number = 5,
+  repeats = 1,
+  classProbs = TRUE)
+
+
+
+
+grid <- expand.grid(mtry = ncol(trainTransformed))
+
+
+# Train the bagged tree model
+bagfit <- train( Chest.pain.type~ .,
+                 data = trainTransformed, 
+                 method = "rf",
+                 trControl = fitControl,
+                 verbose = FALSE,
+                 tuneGrid = grid)
+
+
+
+names(bagfit)
+```
+
+```{r}
+trellis.par.set(caretTheme())
+
+
+predvals <- predict(bagfit, holdoutTransformed)
+
+
+confusionMatrix(predvals, holdoutTransformed$Chest.pain.type)
+```
+
+```{r}
+varImp(bagfit)
+```
+
+```{r}
+fitControl <- trainControl(
+  method = "repeatedcv", ## perform repeated k-fold CV
+  number = 5,
+  repeats = 1,
+  classProbs = TRUE)
+
+
+
+
+grid <- expand.grid(mtry = 1:(ncol(trainTransformed)-1))
+
+forestfit <- train(Chest.pain.type ~ .,
+                   data = trainTransformed, 
+                   method = "rf",
+                   trControl = fitControl,
+                   verbose = FALSE,
+                   tuneGrid = grid)
+
+## check what information is available for the model fit
+names(forestfit)
+```
+
+```{r}
+trellis.par.set(caretTheme())
+plot(forestfit)
+```
+
+```{r}
+predvals <- predict(forestfit, holdoutTransformed)
+
+## create the confusion matrix and view the results
+confusionMatrix(predvals, holdoutTransformed$Chest.pain.type)
+```
+
+```{r}
+varImp(forestfit)
+
+
+```
+
+```{r}
+grid <- expand.grid(interaction.depth = seq(1:3),
+                    shrinkage = seq(from = 0.01, to = 0.2, by = 0.01),
+                    n.trees = seq(from = 100, to = 500, by = 100),
+                    n.minobsinnode = seq(from = 5, to = 15, by = 5)
+)
+
+
+boostedfit <- train(Chest.pain.type ~ .,
+                    data = trainTransformed, 
+                    method = "gbm",
+                    trControl = fitControl,
+                    verbose = FALSE,
+                    tuneGrid = grid)
+## check what information is available for the model fit
+names(boostedfit)
+```
+
+```{r}
+trellis.par.set(caretTheme())
+plot(boostedfit)
+```
+
+```{r}
+predvals <- predict(boostedfit, holdoutTransformed)
+
+## compute the performance metrics
+confusionMatrix(predvals, holdoutTransformed$Chest.pain.type)
+```
+
+```{r}
+varImp(boostedfit)
+```
+
+```{r}
+predvals.boosted <- predict(boostedfit, holdoutTransformed)
+#
+# ## compute the performance metrics
+postres.boosted <-  postResample(pred = predvals.boosted, obs = holdoutTransformed$Chest.pain.type)
+
+## Rank the variables in terms of their importance
+varImp(boostedfit)
+```
+
+```{r}
+grid <- expand.grid(C = c(0.01, 0.1, 10, 100, 1000)) #C is cost
+
+svmlinearfit <- train(Chest.pain.type ~ .,
+                      data = trainTransformed,
+                      method = "svmLinear",
+                      trControl = fitControl,
+                      verbose = FALSE,
+                      tuneGrid = grid)
+
+## check what information is available for the model fit
+names(svmlinearfit)
+```
+
+```{r}
+trellis.par.set(caretTheme())
+plot(svmlinearfit)
+```
+
+```{r}
+## make predictions on the hold-out set
+predvals.svm.linear <- predict(svmlinearfit, holdoutTransformed)
+
+## compute the performance metrics
+postres.svm.linear <-  postResample(pred = predvals.svm.linear, obs = holdoutTransformed$Chest.pain.type)
+
+## Rank the variables in terms of their importance
+varImp(svmlinearfit)
+```
+
+```{r}
+resamps <- resamples(list(RF = forestfit,
+                          GBM = boostedfit,
+                          SVM = svmlinearfit))
+resamps
+```
+
+```{r}
+summary(resamps)
+```
+
+```{r}
+bwplot(resamps)
+```
+
+```{r}
+stopCluster(cl)
+
+densityplot(forestfit, pch = "l")
+```
+
+```{r}
+densityplot(boostedfit, pch = "l")
+```
+
+```{r}
+densityplot(boostedfit, pch = "l")
+```
+
+```{r}
+resamps <- resamples(list(RandomForest = forestfit,
+                          GBM = boostedfit,
+                          SVM.Linear = svmlinearfit))
+summary(resamps)
+```
+
+```{r}
+## view the comparisons via graphs
+bwplot(resamps)
+```
+
+```{r}
+errors.rf <- as.numeric(predvals) - as.numeric(holdoutTransformed$Chest.pain.type)
+errors.boosted <- as.numeric(predvals.boosted) - as.numeric(holdoutTransformed$Chest.pain.type)
+errors.svm.linear <- as.numeric(predvals.svm.linear) - as.numeric(holdoutTransformed$Chest.pain.type)
+
+#bwplot(resamps,
+
+## Next, compare on the performance in predictions on the holdout subset
+#errors.rf <- as.numeric(predvals) - as.numeric(holdoutTransformed$Chest.pain.type),
+#errors.boosted <- as.numeric(predvals.boosted) - as.numeric(holdoutTransformed$Chest.pain.type),
+#errors.svm.linear <- as.numeric(predvals.svm.linear) - as.numeric(holdoutTransformed$Chest.pain.type))
+
+# Create density plots
+library(lattice)
+densityplot(errors.rf)
+```
+
+```{r}
+densityplot(errors.boosted)
+
+```
+
+```{r}
+densityplot(errors.svm.linear)
+```
+
+```{r}
+densityplot(errors.rf, pch="l")
+```
+
+```{r}
+densityplot(errors.boosted, pch="l")
+```
+
+```{r}
+densityplot(errors.svm.linear, pch="l")
+```
+
+```{r}
+df.1 <- data.frame(error = errors.rf,
+                   model = rep("randomforest", (length(errors.rf))))
+df.2 <- data.frame(error = errors.boosted,
+                   model = rep("gbm", (length(errors.boosted))))
+df.3 <- data.frame(error = errors.svm.linear,
+                   model = rep("svm.linear", (length(errors.svm.linear))))
+df.total <- rbind(df.1, df.2, df.3)
+df.total$model <- as.factor(df.total$model)
+summary(df.total)
+```
+
+```{r}
+mu <- ddply(df.total, "model", summarise, grp.mean = mean(error))
+
+ggplot(df.total, aes(x = error), color = model) +
+  geom_density() +
+  facet_grid(model ~ .) +
+  geom_vline(data = mu,
+             aes(xintercept = grp.mean),
+             linetype = "dashed")
+```
+
+Conclusion:
+
+Since my data set is mainly related to the medical field,Sensitivity is considered the most accurate among the remaining predictor variables (Quave, C. L., Pardo-de-Santayana, M., & Pieroni, A. (2012)). The model which can detect three different types of chest pains but with less amount of accuracy is boosted tree model followed by the
+SVM linear regression.
+
+Based on the above values of sensitivity ASY -Chest pain type can be predicted more accurately among the rest of the chest pain types. The goal of my project is to find the type of chest pain that is closely associated with the remaining paraments and primarily with MAX.HR and heart disease. So, I will be looking at the sensitivity values among all the four types of chest pain. By analyzing the above results, we can conclude that ASY chest pain type is closely associated with the remaining paraments and MAX.HR and Heart disease. In addition to that I will be assuring the variable importance across all the three models to access the association with the chest pain type.
+
+Based on the three models, MAX.HR and Cholesterol levels are
+closely associated with the chest pain type.
+
+To conclude the MRP in next week I will be determining the
+type of association with MAX.HR and filtering ASY chest pain type with the rest and performing logistic regression with the ASY chest pain type and MAX.HR to determine the heart disease.

@@ -1,0 +1,78 @@
+**LOGISTIC REGRESSION**
+
+```{r}
+##view updated summary of data after factors are converted
+library(MASS)
+
+#loaded the dataset
+dsobject <- read.csv("C:/Users/sathw/Desktop/Heart_Disease_Prediction.csv", header=TRUE)
+View(dsobject)
+
+
+#Used mutate function to set the chest pain type '4' i.e ASY as 1 and remining as '0'
+dsobject <- dsobject %>% 
+  mutate(ASY_ChestPain = ifelse(Chest.pain.type == "4", 1, 0))
+
+#used mutate funtion to set the heart disease presence as 1 and absence as 0 by creating a new coloumn called HeartDisease_Presence
+dsobject <- dsobject %>%
+  mutate(HeartDisease_Presence = ifelse(Heart.Disease == "Presence", 1, 0))
+summary(dsobject)
+View(dsobject)
+
+
+```
+
+```{r}
+#used logistic regression to predict the heart disease presence or absence by using asy of chest pain type and Max.HR
+str(dsobject)
+glmmodel.1.fit <- glm( HeartDisease_Presence ~ Max.HR+ASY_ChestPain, 
+                      family=binomial,
+                      data=dsobject)
+summary(glmmodel.1.fit)
+```
+
+From the above analysis we can glean that for every one unit increase of the maximum heart rate the predictability decreases by 0.0033. But on the contrary side the person with the 'ASY' chest pain type predicted probability of the of the heart disease is 1.920 .
+
+```{r}
+#used logistic regression to predict the heart disease presence or absence by using Max.HR
+
+glmmodel.2.fit <- glm( HeartDisease_Presence ~ Max.HR, 
+                       family=binomial,
+                       data=dsobject)
+
+summary(glmmodel.2.fit)
+
+```
+
+From the above analysis we can glean that for every one unit increase of the maximum heart rate the predictability decreases by 0.04 which is higher compared to the model when combined with the chest pain type.
+
+```{r}
+
+glmmodel.3.fit <- glm( HeartDisease_Presence ~ ASY_ChestPain,
+                       family=binomial,
+                       data=dsobject)
+
+summary(glmmodel.3.fit)
+```
+
+The Asy_type of chest pain type shows the predicted probability of the heart disease is 2.2245.
+
+```{r}
+dsobject2 <- read.csv("C:/Users/sathw/Desktop/Heart_Disease_Prediction.csv", header=TRUE)
+
+
+dsobject2 <- dsobject2 %>%
+  mutate(HeartDisease_Presence = ifelse(Heart.Disease == "Presence", 1, 0))
+
+dsobject2 <- dsobject2[, -14]
+
+
+#used logistic regression to predict the heart disease presence or absence by using all the predictors
+
+glmmodel.3.fit <- glm( HeartDisease_Presence~ .,
+                       family=binomial,
+                       data=dsobject2)
+summary(glmmodel.3.fit)
+```
+
+The above is the complete model of the logistic regression.
